@@ -58,6 +58,7 @@ app.put("/", function (req, res) {
     "useremail",
     "userphonenumber",
     "useridrole",
+    "userstatus"
   ]);
 
   User.findByIdAndUpdate(
