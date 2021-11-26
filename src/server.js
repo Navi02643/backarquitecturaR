@@ -28,13 +28,9 @@ app.use("/api", require("./controllers/index"));
 
 /////////CONNECTION TO MONGODB
 mongoose
-  .connect(process.env.URLDB, {
-  })
+  .connect(process.env.URLDB, {})
   .then((resp) => {
-    console.log(
-      "[SERVER]".green,
-      `Database ONLINE in ${process.env.URLDB}`
-    );
+    console.log("[SERVER]".green, `Database ONLINE in ${process.env.URLDB}`);
   })
   .catch((err) => {
     console.log("[SERVER]".red, `Conexion fallida: ${err}`);
@@ -50,7 +46,8 @@ app.use((req, res, next) => {
 });
 
 server = app.listen(process.env.PORT, () => {
-
-  console.log("[SERVER]".green,`Our app is running on port ${ process.env.PORT }`);
-
+  console.log(
+    "[SERVER]".green,
+    `Our app is running on port ${process.env.PORT}`
+  );
 });

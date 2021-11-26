@@ -5,22 +5,21 @@ const express = require("express");
 const app = express();
 
 app.get("/", function (req, res) {
-  User.find({ estado: true })
-    .exec((err, user) => {
-      if (err) {
-        return res.status(400).json({
-          ok: false,
-          msg: "Ocurrio un error al momento de consultar los usuarios",
-          err,
-        });
-      }
-      res.json({
-        ok: true,
-        msg: "Lista de usuarios obtenida con exito",
-        conteo: user.length,
-        user,
+  User.find({ estado: true }).exec((err, user) => {
+    if (err) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Ocurrio un error al momento de consultar los usuarios",
+        err,
       });
+    }
+    res.json({
+      ok: true,
+      msg: "Lista de usuarios obtenida con exito",
+      conteo: user.length,
+      user,
     });
+  });
 });
 
 app.post("/", function (req, res) {
@@ -58,7 +57,7 @@ app.put("/", function (req, res) {
     "useremail",
     "userphonenumber",
     "useridrole",
-    "userstatus"
+    "userstatus",
   ]);
 
   User.findByIdAndUpdate(
@@ -105,4 +104,4 @@ app.delete("/", function (req, res) {
   );
 });
 
-module.exports = app; 
+module.exports = app;

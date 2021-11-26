@@ -1,30 +1,15 @@
-const rolemodel = require("../models/role");
+const homeworkmodel = require("../models/homeworks");
 const express = require("express");
 const app = express();
 
 app.get("/", async (req, res) => {
   try {
-    const role = await rolemodel.find({ status: true });
-    idRole = req.query.idRole;
-    const Rolefind = await rolemodel.findById(idRole);
-    if (Rolefind) {
-      return res.status(400).json({
-        estatus: "200",
-        err: false,
-        msg: "Information obtained correctly.",
-        cont: {
-          name: Rolefind,
-        },
-      });
-    }
-    if (role.length <= 0) {
+    const homework = await homeworkmodel.find();
+    if (homework.length <= 0) {
       res.status(404).send({
         estatus: "404",
         err: true,
-        msg: "No roles were found in the database.",
-        cont: {
-          role,
-        },
+        msg: "No homeworks were found in the database.",
       });
     } else {
       res.status(200).send({
@@ -32,7 +17,7 @@ app.get("/", async (req, res) => {
         err: false,
         msg: "Information obtained correctly.",
         cont: {
-          role,
+          homework,
         },
       });
     }
@@ -40,7 +25,7 @@ app.get("/", async (req, res) => {
     res.status(500).send({
       estatus: "500",
       err: true,
-      msg: "Error getting the roles.",
+      msg: "Error getting the homeworks.",
       cont: {
         err: Object.keys(err).length === 0 ? err.message : err,
       },
@@ -50,39 +35,39 @@ app.get("/", async (req, res) => {
 
 app.post("/", async (req, res) => {
   try {
-    const role = new rolemodel(req.body);
-    let err = role.validateSync();
+    const homework = new homeworkmodel(req.body);
+    let err = homework.validateSync();
     if (err) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "Error: Error to insert role.",
+        msg: "Error: Error to insert homework.",
         cont: {
           err,
         },
       });
     }
-    const rolefind = await rolemodel.findOne({
-      rolename: { $regex: `${role.rolename}$`, $options: "i" },
+    const homeworkfind = await homeworkmodel.findOne({
+      homeworkname: { $regex: `${homework.homeworkname}$`, $options: "i" },
     });
-    if (rolefind) {
+    if (homeworkfind) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "The role you are trying to register already exists",
+        msg: "The homework you are trying to register already exists",
         cont: {
-          rolename: rolefind.rolename,
+          homeworkname: homeworkfind.homeworkname,
         },
       });
     }
-    const newrole = await role.save();
-    if (newrole.length <= 0) {
+    const newhomework = await homework.save();
+    if (newhomework.length <= 0) {
       res.status(400).send({
         estatus: "400",
         err: true,
-        msg: "Error: Role could not be registered.",
+        msg: "Error: homework could not be registered.",
         cont: {
-          newrole,
+          newhomework,
         },
       });
     } else {
@@ -96,7 +81,7 @@ app.post("/", async (req, res) => {
     res.status(500).send({
       estatus: "500",
       err: true,
-      msg: "Error: Error to insert role",
+      msg: "Error: Error to insert homework",
       cont: {
         err: Object.keys(err).length === 0 ? err.message : err,
       },
@@ -106,8 +91,8 @@ app.post("/", async (req, res) => {
 
 app.put("/", async (req, res) => {
   try {
-    const idRole = req.query.idRole;
-    if (req.query.idRole == "") {
+    const idhomework = req.query.idhomework;
+    if (req.query.idhomework == "") {
       return res.status(400).send({
         estatus: "400",
         err: true,
@@ -116,55 +101,54 @@ app.put("/", async (req, res) => {
       });
     }
 
-    req.body._id = idRole;
+    req.body._id = idhomework;
 
-    const Rolefind = await rolemodel.findById(idRole);
+    const homeworkfind = await homeworkmodel.findById(idhomework);
 
-    if (!Rolefind) {
+    if (!homeworkfind) {
       return res.status(404).send({
         estatus: "404",
         err: true,
-        msg: "Error: The role was not found in the database.",
-        cont: Rolefind,
+        msg: "Error: The homework was not found in the database.",
       });
     }
-    const newrole = new rolemodel(req.body);
-    let err = newrole.validateSync();
+    const newhomework = new homeworkmodel(req.body);
+    let err = newhomework.validateSync();
 
     if (err) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "Error: Error inserting role.",
+        msg: "Error: Error inserting homework.",
         cont: {
           err,
         },
       });
     }
-    const roleupdate = await rolemodel.findByIdAndUpdate(
-      idRole,
-      { $set: newrole },
+    const homeworkupdate = await homeworkmodel.findByIdAndUpdate(
+      idhomework,
+      { $set: newhomework },
       { new: true }
     );
-    if (!roleupdate) {
+    if (!homeworkupdate) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "Error: Trying to update the role.",
+        msg: "Error: Trying to update the homework.",
         cont: 0,
       });
     } else {
       return res.status(200).json({
         ok: true,
         resp: 200,
-        msg: "Success: The role was updated successfully.",
+        msg: "Success: The homework was updated successfully.",
       });
     }
   } catch (err) {
     res.status(500).send({
       estatus: "500",
       err: true,
-      msg: "Error: Error updating role.",
+      msg: "Error: Error updating homework.",
       cont: {
         err: Object.keys(err).length === 0 ? err.message : err,
       },
@@ -174,48 +158,47 @@ app.put("/", async (req, res) => {
 
 app.delete("/", async (req, res) => {
   try {
-    if (req.query.idRole == "") {
-      return res.status(400).send({
+    if (req.query.idhomework == "") {
+      return res.status.send({
         estatus: "400",
         err: true,
         msg: "Error: A valid id was not sent.",
         cont: 0,
       });
     }
-
-    idRole = req.query.idRole;
-    const Rolefind = await rolemodel.findById(idRole);
-    if (!Rolefind) {
+    idhomework = req.query.idhomework;
+    const homeworkfind = await homeworkmodel.findById(idhomework);
+    if (!homeworkfind) {
       return res.status(404).send({
         estatus: "404",
         err: true,
-        msg: "Error: The role was not found in the database.",
-        cont: Rolefind,
+        msg: "Error: The homework was not found in the database.",
+        cont: homeworkfind,
       });
     }
-    const roledelete = await rolemodel.findOneAndUpdate(
-      { _id: Rolefind },
-      { $set: { rolestatus: "0" } }
+    const homeworkdelete = await homeworkmodel.findOneAndUpdate(
+      { _id: homeworkfind },
+      { $set: { homeworkstatus: "Cancell" } }
     );
-    if (!roledelete) {
+    if (!homeworkdelete) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "Error: When trying to delete the role.",
+        msg: "Error: When trying to delete the homework.",
         cont: 0,
       });
     } else {
       return res.status(200).json({
         ok: true,
         resp: 200,
-        msg: `Success: the role has been successfully removed.`,
+        msg: `Success: the homework has been successfully removed.`,
       });
     }
   } catch (err) {
     res.status(500).send({
       estatus: "500",
       err: true,
-      msg: "Error: Failed to delete role.",
+      msg: "Error: Failed to delete homework.",
       cont: {
         err: Object.keys(err).length === 0 ? err.message : err,
       },

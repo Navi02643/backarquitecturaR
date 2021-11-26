@@ -5,10 +5,10 @@ const roleSchema = new Schema({
   rolename: {
     type: String,
   },
-  status: {
+  rolestatus: {
     type: Boolean,
     default: true,
-  }
+  },
 });
 
 module.exports = mongoose.model("role", roleSchema);

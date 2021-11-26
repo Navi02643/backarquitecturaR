@@ -2,12 +2,17 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const historySchema = new Schema({
-  historyname: {
-    type: String,
+  historynameproject: {
+    type: Schema.Types.ObjectId,
+    ref: "project",
+  },
+  historynamehomework: {
+    type: Schema.Types.ObjectId,
+    ref: "homework",
   },
   historydate: {
-    type: Date
-  }
+    type: Date,
+  },
 });
 
 module.exports = mongoose.model("history", historySchema);

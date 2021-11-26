@@ -1,30 +1,15 @@
-const rolemodel = require("../models/role");
+const projectmodel = require("../models/project");
 const express = require("express");
 const app = express();
 
 app.get("/", async (req, res) => {
   try {
-    const role = await rolemodel.find({ status: true });
-    idRole = req.query.idRole;
-    const Rolefind = await rolemodel.findById(idRole);
-    if (Rolefind) {
-      return res.status(400).json({
-        estatus: "200",
-        err: false,
-        msg: "Information obtained correctly.",
-        cont: {
-          name: Rolefind,
-        },
-      });
-    }
-    if (role.length <= 0) {
+    const project = await projectmodel.find();
+    if (project.length <= 0) {
       res.status(404).send({
         estatus: "404",
         err: true,
-        msg: "No roles were found in the database.",
-        cont: {
-          role,
-        },
+        msg: "No projects were found in the database.",
       });
     } else {
       res.status(200).send({
@@ -32,7 +17,7 @@ app.get("/", async (req, res) => {
         err: false,
         msg: "Information obtained correctly.",
         cont: {
-          role,
+          project,
         },
       });
     }
@@ -40,7 +25,7 @@ app.get("/", async (req, res) => {
     res.status(500).send({
       estatus: "500",
       err: true,
-      msg: "Error getting the roles.",
+      msg: "Error getting the projects.",
       cont: {
         err: Object.keys(err).length === 0 ? err.message : err,
       },
@@ -50,39 +35,39 @@ app.get("/", async (req, res) => {
 
 app.post("/", async (req, res) => {
   try {
-    const role = new rolemodel(req.body);
-    let err = role.validateSync();
+    const project = new projectmodel(req.body);
+    let err = project.validateSync();
     if (err) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "Error: Error to insert role.",
+        msg: "Error: Error to insert project.",
         cont: {
           err,
         },
       });
     }
-    const rolefind = await rolemodel.findOne({
-      rolename: { $regex: `${role.rolename}$`, $options: "i" },
+    const projectfind = await projectmodel.findOne({
+      projectname: { $regex: `${project.projectname}$`, $options: "i" },
     });
-    if (rolefind) {
+    if (projectfind) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "The role you are trying to register already exists",
+        msg: "The project you are trying to register already exists",
         cont: {
-          rolename: rolefind.rolename,
+          projectname: projectfind.projectname,
         },
       });
     }
-    const newrole = await role.save();
-    if (newrole.length <= 0) {
+    const newproject = await project.save();
+    if (newproject.length <= 0) {
       res.status(400).send({
         estatus: "400",
         err: true,
-        msg: "Error: Role could not be registered.",
+        msg: "Error: project could not be registered.",
         cont: {
-          newrole,
+          newproject,
         },
       });
     } else {
@@ -96,7 +81,7 @@ app.post("/", async (req, res) => {
     res.status(500).send({
       estatus: "500",
       err: true,
-      msg: "Error: Error to insert role",
+      msg: "Error: Error to insert project",
       cont: {
         err: Object.keys(err).length === 0 ? err.message : err,
       },
@@ -106,8 +91,8 @@ app.post("/", async (req, res) => {
 
 app.put("/", async (req, res) => {
   try {
-    const idRole = req.query.idRole;
-    if (req.query.idRole == "") {
+    const idProject = req.query.idProject;
+    if (req.query.idProject == "") {
       return res.status(400).send({
         estatus: "400",
         err: true,
@@ -116,55 +101,54 @@ app.put("/", async (req, res) => {
       });
     }
 
-    req.body._id = idRole;
+    req.body._id = idProject;
 
-    const Rolefind = await rolemodel.findById(idRole);
+    const Projectfind = await projectmodel.findById(idProject);
 
-    if (!Rolefind) {
+    if (!Projectfind) {
       return res.status(404).send({
         estatus: "404",
         err: true,
-        msg: "Error: The role was not found in the database.",
-        cont: Rolefind,
+        msg: "Error: The project was not found in the database.",
       });
     }
-    const newrole = new rolemodel(req.body);
-    let err = newrole.validateSync();
+    const newproject = new projectmodel(req.body);
+    let err = newproject.validateSync();
 
     if (err) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "Error: Error inserting role.",
+        msg: "Error: Error inserting project.",
         cont: {
           err,
         },
       });
     }
-    const roleupdate = await rolemodel.findByIdAndUpdate(
-      idRole,
-      { $set: newrole },
+    const Projectupdate = await projectmodel.findByIdAndUpdate(
+      idProject,
+      { $set: newproject },
       { new: true }
     );
-    if (!roleupdate) {
+    if (!Projectupdate) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "Error: Trying to update the role.",
+        msg: "Error: Trying to update the project.",
         cont: 0,
       });
     } else {
       return res.status(200).json({
         ok: true,
         resp: 200,
-        msg: "Success: The role was updated successfully.",
+        msg: "Success: The project was updated successfully.",
       });
     }
   } catch (err) {
     res.status(500).send({
       estatus: "500",
       err: true,
-      msg: "Error: Error updating role.",
+      msg: "Error: Error updating project.",
       cont: {
         err: Object.keys(err).length === 0 ? err.message : err,
       },
@@ -174,48 +158,47 @@ app.put("/", async (req, res) => {
 
 app.delete("/", async (req, res) => {
   try {
-    if (req.query.idRole == "") {
-      return res.status(400).send({
+    if (req.query.idProject == "") {
+      return res.status.send({
         estatus: "400",
         err: true,
         msg: "Error: A valid id was not sent.",
         cont: 0,
       });
     }
-
-    idRole = req.query.idRole;
-    const Rolefind = await rolemodel.findById(idRole);
-    if (!Rolefind) {
+    idProject = req.query.idProject;
+    const Projectfind = await projectmodel.findById(idProject);
+    if (!Projectfind) {
       return res.status(404).send({
         estatus: "404",
         err: true,
-        msg: "Error: The role was not found in the database.",
-        cont: Rolefind,
+        msg: "Error: The project was not found in the database.",
+        cont: Projectfind,
       });
     }
-    const roledelete = await rolemodel.findOneAndUpdate(
-      { _id: Rolefind },
-      { $set: { rolestatus: "0" } }
+    const projectdelete = await projectmodel.findOneAndUpdate(
+      { _id: Projectfind },
+      { $set: { projectstatus: "Cancell" } }
     );
-    if (!roledelete) {
+    if (!projectdelete) {
       return res.status(400).json({
         ok: false,
         resp: 400,
-        msg: "Error: When trying to delete the role.",
+        msg: "Error: When trying to delete the project.",
         cont: 0,
       });
     } else {
       return res.status(200).json({
         ok: true,
         resp: 200,
-        msg: `Success: the role has been successfully removed.`,
+        msg: `Success: the project has been successfully removed.`,
       });
     }
   } catch (err) {
     res.status(500).send({
       estatus: "500",
       err: true,
-      msg: "Error: Failed to delete role.",
+      msg: "Error: Failed to delete project.",
       cont: {
         err: Object.keys(err).length === 0 ? err.message : err,
       },
